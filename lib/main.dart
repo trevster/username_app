@@ -4,14 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart' as math;
 
+part 'helper.dart';
+
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -41,16 +42,15 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   late final TextEditingController _textEditingController;
   late final FocusNode _focusNode;
 
-  late double kDeviceLogicalHeight;
-  late double kDeviceLogicalWidth;
-
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  final BorderRadius _borderRadius = BorderRadius.circular(10.0);
-
   late AnimationController animationController;
   late Animation<double> animation;
 
+  late double kDeviceLogicalHeight;
+  late double kDeviceLogicalWidth;
+
+  // If additional there are more than 1 field, I prefer to use formKey and default function validator in TextFormField
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final BorderRadius _borderRadius = BorderRadius.circular(10.0);
 
   @override
   void initState() {
@@ -63,26 +63,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     super.initState();
   }
 
-  String validateUsername(String value) {
-    if (value.isEmpty) {
-      return 'Username cannot be empty';
-    } else {
-      if (RegExp(r'^[\_a-zA-Z0-9\.]+$').hasMatch(value)) {
-        if (value.length > 30) {
-          return 'Username should be no longer than 30 characters';
-        }
-        return '';
-      } else {
-        return 'Username cannot contain special characters';
-      }
-    }
-  }
 
-  math.Vector3 calc(){
-    double progress = animationController.value;
-    double offset = sin(progress * pi * 3.0);
-    return math.Vector3(offset * 10, 0.0,0.0);
-  }
 
   @override
   void dispose() {
@@ -111,11 +92,12 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  //Spacing to top
+
+                  // White space to top
                   SizedBox(height: kDeviceLogicalHeight * 0.3,),
                   Stack(
                     children: [
-                      // TextFormField
+                      // Username TextFormField
                       Column(
                         children: [
                           // This sized box will dictate the distance between the
@@ -160,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                         ],
                       ),
 
-                      // Error text
+                      // Bubble Error text
                       Positioned(
                         top: 0,
                         right: 8,
@@ -168,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                           animation: animationController,
                           builder: (BuildContext context, Widget? child) {
                             return Transform(
-                              transform: Matrix4.translation(calc()),
+                              transform: Matrix4.translation(calc(animationController)),
                               child: AnimatedOpacity(
                                 opacity: showError ? 1.0 : 0.0,
                                 duration: const Duration(milliseconds: 300),
@@ -199,6 +181,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                       )
                     ],
                   ),
+                  // White space
                   const SizedBox(height: 20,),
 
                   // Submit Button
@@ -235,26 +218,5 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
         ),
       ),
     );
-  }
-}
-
-class Triangle extends CustomPainter {
-  final Color backgroundColor;
-  Triangle(this.backgroundColor);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()..color = backgroundColor;
-
-    var path = Path();
-    path.lineTo(-4, 0);
-    path.lineTo(0, 7);
-    path.lineTo(4, 0);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
   }
 }
